@@ -1,0 +1,48 @@
+# Config File For The MQ Server
+# This configuration file is in YAML format
+
+# Configuration items for log behavior of the MQ server
+# Log level configuration item. Legal values :
+# DEBUG : Set the log to debug level
+# INFO : Set the log to information level
+# WARN : Set the log to warn level
+# ERROR : Set the log to error level
+LogLevel: INFO
+
+# The log is a rotation log, will generate a log file every day
+# This configuration item configurates the max file size for each log file, a new log file will be generated after the log file exceed the size
+# This configuration item must be ended with G or M, 1G = 1024M
+LogMaxSizePerFile: 1G
+# This configuration item configurates max day for the MQ server to keep a log file
+LogMaxRetainDay: 30
+
+# The network address that the MQ server listens on
+# The format of the address string is IP:port. For example : 192.168.0.1:168000
+ListeningAddress: 127.0.0.1:16800
+
+# Configure whether to flush the file cache to disk each time a message is sent to or consume from the MQ server.
+# If the configuration is false, the file cache refresh mechanism is left to the operating system, or wait for the MQ server to close to refresh.
+FlushFileCacheEveryOperation: false
+
+# Message queues to be deployed on the MQ server ：
+# Each queue configuration item consists of two parts:
+#   1. the queue name
+#   2. the maximum storage time for every queue message
+#
+#   For example :
+#
+# - QueueName: TestQueue-1
+#   MessageStoreTimeInMs: 259200000
+#
+# configure a queue named TestQueue-1 and message storage time of 3 days. Unit of message storage time is milliseconds
+# The queue name is used in CreateProducer function and CreateConsumer function. Queue name must be unique.
+#
+Queues:
+  - QueueName: TestQueue-1
+    MessageStoreTimeInMs: 259200000
+
+  - QueueName: TestQueue-2
+    MessageStoreTimeInMs: 259200000
+
+  - QueueName: TestQueue-3
+    MessageStoreTimeInMs: 259200000
