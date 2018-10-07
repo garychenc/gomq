@@ -25,3 +25,7 @@ mqd/src/server/launch/store/mq-test-2-2.qc-consumer.meta
 mqd/src/server/launch/store/mq-test-2.qc
 mqd/src/server/queue/store/test_queue.qc
 mqd/src/server/queue/store/test_queue1.qc
+client-example/src/ce/vendor
+client-example/src/ce/consumer.log
+client-example/src/pe/vendor
+client-example/src/pe/producer.log

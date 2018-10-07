@@ -62,4 +62,20 @@
 
 + 暂时将 CODE_ROOT/mqd 路径从 GOPATH 环境变量中移除，然后将 CODE_ROOT/client-example 路径添加到 GOPATH 环境变量中。
 
-+ 在命令行控制台中进入 CODE_ROOT/client-example/src/example 目录，运行 dep ensure 命令。
++ 在命令行控制台中进入 CODE_ROOT/client-example/src/pe 目录，运行 dep ensure 命令。
+
++ 在命令行控制台中进入 CODE_ROOT/client-example/src/ce 目录，运行 dep ensure 命令。
+
++ 在命令行控制台中进入 CODE_ROOT/client-example 目录，运行 go test pe 命令。然后在 CODE_ROOT/client-example/src/pe 目录下可看到 producer.log 文件，记录着生产者示例函数的消息发送日志。
+
++ 在命令行控制台中进入 CODE_ROOT/client-example 目录，运行 go test ce 命令。然后在 CODE_ROOT/client-example/src/ce 目录下可看到 consumer.log 文件，记录着消费者示例函数的消息接收日志。
+
++ 可通过查看 CODE_ROOT/client-example/src 目录下的源代码，了解 GOMQ 客户端的使用方法和 GOMQ 客户端各接口的详细 API 说明。
+
+# 修改源码
+
+TODO
+
+# 架构简介
+
+TODO
