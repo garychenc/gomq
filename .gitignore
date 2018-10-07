@@ -10,3 +10,18 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+mqd/bin/config
+mqd/bin/store
+mqd/bin/logs
+mqd/bin/gomqd
+mqd/src/server/launch/store/mq-test-0.qc
+mqd/src/server/launch/store/mq-test-1.qc
+mqd/src/server/launch/store/mq-test-1.qc-consumer.meta
+mqd/src/server/launch/store/mq-test-2-0.qc
+mqd/src/server/launch/store/mq-test-2-0.qc-consumer.meta
+mqd/src/server/launch/store/mq-test-2-1.qc
+mqd/src/server/launch/store/mq-test-2-2.qc
+mqd/src/server/launch/store/mq-test-2-2.qc-consumer.meta
+mqd/src/server/launch/store/mq-test-2.qc
+mqd/src/server/queue/store/test_queue.qc
+mqd/src/server/queue/store/test_queue1.qc

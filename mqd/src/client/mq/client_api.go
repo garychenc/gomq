@@ -17,7 +17,6 @@
 package mq
 
 import (
-	"common/protocol"
 	"errors"
 	"io"
 )
@@ -54,7 +53,7 @@ import (
  *   The only parameter for the CreateProducer function is the name of the queue to send messages to. After the instance of IProducer was created,
  *   You can use the function of the IProducer interface, for example :
  *
- *   		msg, _ := protocol.NewBytesMessageWithoutId([]byte("test-msg-1"))
+ *   		msg, _ := mq.NewBytesMessageWithoutId([]byte("test-msg-1"))
  *			msgId, err := producer.Produce(msg)
  *			if err != nil {
  *      	// Process Error
@@ -204,7 +203,7 @@ type IConsumer interface {
 	 * err : if there is any error, the error will save in this return value, otherwise this value is nil
 	 *
 	 */
-	Consume() (msg protocol.IMessage, err error)
+	Consume() (msg IMessage, err error)
 
 	/*
 	 * Use the ConsumeWithTimeout function to receive a message from the MQ server.
@@ -220,7 +219,7 @@ type IConsumer interface {
 	 * err : if there is any error, the error will save in this return value, otherwise this value is nil
 	 *
 	 */
-	ConsumeWithTimeout(timeout int64) (msg protocol.IMessage, err error)
+	ConsumeWithTimeout(timeout int64) (msg IMessage, err error)
 
 	/*
 	 * Use the ConsumeNoWait function to receive a message from the MQ server immediately.
@@ -232,7 +231,7 @@ type IConsumer interface {
 	 * err : if there is any error, the error will save in this return value, otherwise this value is nil
 	 *
 	 */
-	ConsumeNoWait() (msg protocol.IMessage, err error)
+	ConsumeNoWait() (msg IMessage, err error)
 
 	/*
 	 * Use the Commit function to write the consumer's current offset to persistent file.
@@ -267,7 +266,7 @@ type IProducer interface {
 
 	/*
 	 * Use the Produce function to send a message to the MQ server.
-	 * Create a message using the protocol.NewBytesMessageWithoutId function before calling the function.
+	 * Create a message using the mq.NewBytesMessageWithoutId function before calling the function.
 	 *
 	 * parameters :
 	 * message : The message to be sent.
@@ -277,6 +276,6 @@ type IProducer interface {
 	 * err : if there is any error, the error will save in this return value, otherwise this value is nil
 	 *
 	 */
-	Produce(message protocol.IMessage) (msgId int64, err error)
+	Produce(message IMessage) (msgId int64, err error)
 }
 

@@ -17,8 +17,6 @@
 package mq
 
 import (
-	"common/protocol"
-	"common/utils"
 	"fmt"
 	"strconv"
 	"testing"
@@ -71,7 +69,7 @@ func TestMqBaseFunctions(t *testing.T) {
 	}
 
 	for i := 0; i < 100; i++ {
-		msg := protocol.NewBytesMessageWithoutId([]byte("test-msg-1-" + strconv.Itoa(i)))
+		msg := NewBytesMessageWithoutId([]byte("test-msg-1-" + strconv.Itoa(i)))
 		msgId, err := producer1.Produce(msg)
 		if err != nil {
 			t.Error("Failed.")
@@ -82,7 +80,7 @@ func TestMqBaseFunctions(t *testing.T) {
 	}
 
 	for i := 0; i < 100; i++ {
-		msg := protocol.NewBytesMessageWithoutId([]byte("test-msg-2-" + strconv.Itoa(i)))
+		msg := NewBytesMessageWithoutId([]byte("test-msg-2-" + strconv.Itoa(i)))
 		msgId, err := producer2.Produce(msg)
 		if err != nil {
 			t.Error("Failed.")
@@ -277,14 +275,14 @@ func TestRealSituation(t *testing.T) {
 			for {
 				msg, err := consumer.Consume()
 				if err != nil {
-					fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Consume message error. Error is " + err.Error())
+					fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Consume message error. Error is " + err.Error())
 					time.Sleep(time.Duration(6000) * time.Millisecond)
 				} else {
-					fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Message consumed, MSG ID : " + strconv.FormatInt(msg.MsgId(), 10))
+					fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Message consumed, MSG ID : " + strconv.FormatInt(msg.MsgId(), 10))
 
 					err = consumer.Commit()
 					if err != nil {
-						fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Commit message error. Error is " + err.Error())
+						fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Commit message error. Error is " + err.Error())
 					}
 				}
 			}
@@ -304,12 +302,12 @@ func TestRealSituation(t *testing.T) {
 			}
 
 			for {
-				msg := protocol.NewBytesMessageWithoutId([]byte("TEST-MESSAGE-1"))
+				msg := NewBytesMessageWithoutId([]byte("TEST-MESSAGE-1"))
 				msgId, err := producer.Produce(msg)
 				if err != nil {
-					fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Produce Message Error. Error is " + err.Error())
+					fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Produce Message Error. Error is " + err.Error())
 				} else {
-					fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Message sent, MSG ID : " + strconv.FormatInt(msgId, 10))
+					fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Message sent, MSG ID : " + strconv.FormatInt(msgId, 10))
 				}
 
 				time.Sleep(time.Duration(6000) * time.Millisecond)
@@ -336,14 +334,14 @@ func TestRealConsumer(t *testing.T) {
 			for {
 				msg, err := consumer.Consume()
 				if err != nil {
-					fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Consume message error. Error is " + err.Error())
+					fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Consume message error. Error is " + err.Error())
 					time.Sleep(time.Duration(6000) * time.Millisecond)
 				} else {
-					fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Message consumed, MSG ID : " + strconv.FormatInt(msg.MsgId(), 10))
+					fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Message consumed, MSG ID : " + strconv.FormatInt(msg.MsgId(), 10))
 
 					err = consumer.Commit()
 					if err != nil {
-						fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Commit message error. Error is " + err.Error())
+						fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Commit message error. Error is " + err.Error())
 					}
 				}
 			}
@@ -367,12 +365,12 @@ func TestRealProducer(t *testing.T) {
 			}
 
 			for {
-				msg := protocol.NewBytesMessageWithoutId([]byte("TEST-MESSAGE-1110-0000001-110001-1010010111000"))
+				msg := NewBytesMessageWithoutId([]byte("TEST-MESSAGE-1110-0000001-110001-1010010111000"))
 				msgId, err := producer.Produce(msg)
 				if err != nil {
-					fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Produce Message Error. Error is " + err.Error())
+					fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Produce Message Error. Error is " + err.Error())
 				} else {
-					fmt.Println("[" + strconv.FormatInt(utils.CurrentTimeMillis(), 10) + "] Message sent, MSG ID : " + strconv.FormatInt(msgId, 10))
+					fmt.Println("[" + strconv.FormatInt(CurrentTimeMillis(), 10) + "] Message sent, MSG ID : " + strconv.FormatInt(msgId, 10))
 				}
 
 				time.Sleep(time.Duration(1000) * time.Millisecond)

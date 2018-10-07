@@ -18,7 +18,6 @@ package launch
 
 import (
 	"client/mq"
-	"common/protocol"
 	"fmt"
 	"github.com/astaxie/beego/logs"
 	"server/queue"
@@ -114,7 +113,7 @@ func TestMqBaseFunctions(t *testing.T) {
 	}
 
 	for i := 0; i < 100; i++ {
-		msg := protocol.NewBytesMessageWithoutId([]byte("test-msg-1-" + strconv.Itoa(i)))
+		msg := mq.NewBytesMessageWithoutId([]byte("test-msg-1-" + strconv.Itoa(i)))
 		msgId, err := producer1.Produce(msg)
 		if err != nil {
 			mqServer.Stop()
@@ -126,7 +125,7 @@ func TestMqBaseFunctions(t *testing.T) {
 	}
 
 	for i := 0; i < 100; i++ {
-		msg := protocol.NewBytesMessageWithoutId([]byte("test-msg-2-" + strconv.Itoa(i)))
+		msg := mq.NewBytesMessageWithoutId([]byte("test-msg-2-" + strconv.Itoa(i)))
 		msgId, err := producer2.Produce(msg)
 		if err != nil {
 			mqServer.Stop()
@@ -410,7 +409,7 @@ func TestMultiRoutineMqFunctions(t *testing.T) {
 	for j := 0; j < 10; j++ {
 		go func() {
 			for i := 0; i < 100; i++ {
-				msg := protocol.NewBytesMessageWithoutId([]byte("test-msg-1-" + strconv.Itoa(i)))
+				msg := mq.NewBytesMessageWithoutId([]byte("test-msg-1-" + strconv.Itoa(i)))
 				_, err := producer.Produce(msg)
 				if err != nil {
 					mqServer.Stop()
@@ -487,7 +486,7 @@ func TestMultiRoutineMqFunctions(t *testing.T) {
 		producers[j] =  producer1
 		go func(p mq.IProducer) {
 			for i := 0; i < 1000; i++ {
-				msg := protocol.NewBytesMessageWithoutId([]byte("test-msg-1-" + strconv.Itoa(i)))
+				msg := mq.NewBytesMessageWithoutId([]byte("test-msg-1-" + strconv.Itoa(i)))
 				_, err := p.Produce(msg)
 				if err != nil {
 					mqServer.Stop()

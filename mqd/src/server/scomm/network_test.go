@@ -17,7 +17,7 @@
 package scomm
 
 import (
-	"client/ccomm"
+	"client/mq"
 	"common/utils"
 	"fmt"
 	"runtime"
@@ -55,14 +55,14 @@ func TestNetworkBaseFunction(t *testing.T) {
 	const clientCount = 20
 	wg := &sync.WaitGroup{}
 	wg.Add(clientCount)
-	var networkClients [clientCount]ccomm.INetworkClient
+	var networkClients [clientCount]mq.INetworkClient
 	for i := 0; i < clientCount; i++ {
-		clientConfig := ccomm.NewLongConnNetworkClientDefaultConfig()
+		clientConfig := mq.NewLongConnNetworkClientDefaultConfig()
 		clientConfig.ServerAddress = "127.0.0.1:26800"
-		networkClient := ccomm.NewLongConnNetworkClient(clientConfig)
+		networkClient := mq.NewLongConnNetworkClient(clientConfig)
 		networkClients[i] = networkClient
 
-		go func(client ccomm.INetworkClient, index int) {
+		go func(client mq.INetworkClient, index int) {
 			err := client.ConnectToServer("1", "1", strconv.Itoa(index))
 			if err != nil {
 				client.Disconnect()
@@ -98,7 +98,7 @@ func TestNetworkBaseFunction(t *testing.T) {
 
 	for i := 0; i < clientCount; i++ {
 		_, err1 := networkClients[i].RPC("hello001", []byte("test1"), 5000)
-		if err1 != ccomm.CanNotFindRpcActionError {
+		if err1 != mq.CanNotFindRpcActionError {
 			t.Error("Failed.")
 			return
 		} else {
@@ -255,18 +255,18 @@ func TestMultiRoutineRpcFunction(t *testing.T) {
 	const clientCount = 20
 	wg := &sync.WaitGroup{}
 	wg.Add(clientCount)
-	var networkClients [clientCount]ccomm.INetworkClient
+	var networkClients [clientCount]mq.INetworkClient
 	for i := 0; i < clientCount; i++ {
-		clientConfig := ccomm.NewLongConnNetworkClientDefaultConfig()
+		clientConfig := mq.NewLongConnNetworkClientDefaultConfig()
 		clientConfig.ServerAddress = "127.0.0.1:26801"
-		networkClient := ccomm.NewLongConnNetworkClient(clientConfig)
+		networkClient := mq.NewLongConnNetworkClient(clientConfig)
 		networkClients[i] = networkClient
 		networkClients[i].AddRpcRequestActionIfAbsent("hello6", &HelloworldRequestActionClient{name: "hello6"})
 		networkClients[i].AddRpcRequestActionIfAbsent("hello7", &HelloworldRequestActionClient{name: "hello7"})
 		networkClients[i].AddRpcRequestActionIfAbsent("hello8", &HelloworldRequestActionClient{name: "hello8"})
 		networkClients[i].AddRpcRequestActionIfAbsent("hello9", &HelloworldRequestActionClient{name: "hello9"})
 
-		go func(client ccomm.INetworkClient, index int) {
+		go func(client mq.INetworkClient, index int) {
 			err := client.ConnectToServer("1", "1", strconv.Itoa(index))
 			if err != nil {
 				client.Disconnect()
@@ -306,7 +306,7 @@ func TestMultiRoutineRpcFunction(t *testing.T) {
 	for k := 0; k < 10; k++ {
 		for i := 0; i < clientCount; i++ {
 			for j := 0; j < 5; j++ {
-				go func(client ccomm.INetworkClient, num int) {
+				go func(client mq.INetworkClient, num int) {
 					_, err := client.RPC("hello" + strconv.Itoa(num + 1), []byte("test - " + strconv.Itoa(num + 1)), 5000)
 					if err == nil {
 						wg2.Done()
@@ -322,7 +322,7 @@ func TestMultiRoutineRpcFunction(t *testing.T) {
 	for k := 0; k < 10; k++ {
 		for i := 0; i < clientCount; i++ {
 			for j := 0; j < 4; j++ {
-				go func(client ccomm.INetworkClient, num int) {
+				go func(client mq.INetworkClient, num int) {
 					_, err := networkServer.RPC(client.GetConnectionKey(), "hello" + strconv.Itoa(num + 6), []byte("test - " + strconv.Itoa(num + 6)), 5000)
 					if err == nil {
 						wg3.Done()
@@ -337,7 +337,7 @@ func TestMultiRoutineRpcFunction(t *testing.T) {
 
 	for k := 0; k < 10; k++ {
 		for i := 0; i < clientCount; i++ {
-			go func(client ccomm.INetworkClient) {
+			go func(client mq.INetworkClient) {
 				for j := 0; j < 5; j++ {
 					_, err := client.RPC("hello" + strconv.Itoa(j + 1), []byte("test - " + strconv.Itoa(j + 1)), 5000)
 					if err == nil {
@@ -353,7 +353,7 @@ func TestMultiRoutineRpcFunction(t *testing.T) {
 
 	for k := 0; k < 10; k++ {
 		for i := 0; i < clientCount; i++ {
-			go func(client ccomm.INetworkClient) {
+			go func(client mq.INetworkClient) {
 				for j := 0; j < 4; j++ {
 					_, err := networkServer.RPC(client.GetConnectionKey(), "hello" + strconv.Itoa(j + 6), []byte("test - " + strconv.Itoa(j + 6)), 5000)
 					if err == nil {
@@ -375,7 +375,7 @@ func TestMultiRoutineRpcFunction(t *testing.T) {
 	wg1.Add(clientCount)
 
 	for i := 0; i < clientCount; i++ {
-		go func(client ccomm.INetworkClient) {
+		go func(client mq.INetworkClient) {
 			client.Disconnect()
 			wg1.Done()
 		}(networkClients[i])
@@ -417,11 +417,11 @@ func TestMultiRoutinePushFunction(t *testing.T) {
 
 	wg := &sync.WaitGroup{}
 	wg.Add(clientCount)
-	var networkClients [clientCount]ccomm.INetworkClient
+	var networkClients [clientCount]mq.INetworkClient
 	for i := 0; i < clientCount; i++ {
-		clientConfig := ccomm.NewLongConnNetworkClientDefaultConfig()
+		clientConfig := mq.NewLongConnNetworkClientDefaultConfig()
 		clientConfig.ServerAddress = "127.0.0.1:26802"
-		networkClient := ccomm.NewLongConnNetworkClient(clientConfig)
+		networkClient := mq.NewLongConnNetworkClient(clientConfig)
 		networkClients[i] = networkClient
 		networkClients[i].AddRpcRequestActionIfAbsent("pushHello1", &HelloworldPushAction{wg: wg2})
 		networkClients[i].AddRpcRequestActionIfAbsent("pushHello2", &HelloworldPushAction{wg: wg2})
@@ -429,7 +429,7 @@ func TestMultiRoutinePushFunction(t *testing.T) {
 		networkClients[i].AddRpcRequestActionIfAbsent("pushHello4", &HelloworldPushAction{wg: wg2})
 		networkClients[i].AddRpcRequestActionIfAbsent("pushHello5", &HelloworldPushAction{wg: wg2})
 
-		go func(client ccomm.INetworkClient, index int) {
+		go func(client mq.INetworkClient, index int) {
 			err := client.ConnectToServer("1", "1", strconv.Itoa(index))
 			if err != nil {
 				client.Disconnect()
@@ -466,7 +466,7 @@ func TestMultiRoutinePushFunction(t *testing.T) {
 	for k := 0; k < 10; k++ {
 		for i := 0; i < clientCount; i++ {
 			for j := 0; j < 5; j++ {
-				go func(client ccomm.INetworkClient, num int) {
+				go func(client mq.INetworkClient, num int) {
 					err := networkServer.Push(client.GetConnectionKey(), "pushHello" + strconv.Itoa(num + 1), []byte("test - " + strconv.Itoa(num + 1)))
 					if err != nil {
 						t.Error("Failed.")
@@ -492,7 +492,7 @@ func TestMultiRoutinePushFunction(t *testing.T) {
 	wg1.Add(clientCount)
 
 	for i := 0; i < clientCount; i++ {
-		go func(client ccomm.INetworkClient) {
+		go func(client mq.INetworkClient) {
 			client.Disconnect()
 			wg1.Done()
 		}(networkClients[i])
@@ -538,12 +538,12 @@ func TestMultiRoutineConnectAndDisConnectFunction(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	wg.Add(clientCount)
 
-	clientConfig := ccomm.NewLongConnNetworkClientDefaultConfig()
+	clientConfig := mq.NewLongConnNetworkClientDefaultConfig()
 	clientConfig.ServerAddress = "127.0.0.1:26803"
-	networkClient := ccomm.NewLongConnNetworkClient(clientConfig)
+	networkClient := mq.NewLongConnNetworkClient(clientConfig)
 
 	for i := 0; i < clientCount; i++ {
-		go func(client ccomm.INetworkClient, index int) {
+		go func(client mq.INetworkClient, index int) {
 			err := client.ConnectToServer("1", "1", strconv.Itoa(index))
 			if err != nil {
 				client.Disconnect()
@@ -576,7 +576,7 @@ func TestMultiRoutineConnectAndDisConnectFunction(t *testing.T) {
 	wg1.Add(clientCount)
 
 	for i := 0; i < clientCount; i++ {
-		go func(client ccomm.INetworkClient) {
+		go func(client mq.INetworkClient) {
 			client.Disconnect()
 			wg1.Done()
 		}(networkClient)

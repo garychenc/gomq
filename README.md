@@ -26,12 +26,40 @@
 
 + 目前还没有完善的监控和管理系统可以监控服务器的各种运行指标，并且对服务器进行管理。
 
++ 目前只有 GO 语言开发的生产者和消费者客户端，还不能支持其它语言。
+
 # 快速入门
 
-接下来将会从服务器构建、配置服务器、部署消息队列、启动服务器、创建消息生产者、创建消息消费者等步骤介绍如何快速使用 GOMQ。
+接下来将会从服务器构建、配置服务器、部署消息队列、启动服务器、创建消息生产者、创建消息消费者等步骤介绍如何快速使用 GOMQ，本入门假设你熟悉 GO 语言开发。
 
 + 由于 GOMQ 是采用 GO 语言编写，并且没有提供已编译版本，所以，在使用之前需要先 checkout 源代码，并且在目标操作系统中使用 GO 编译器编译源代码。
 
-+ 安装 GO 开发环境，[Windows & Linux 安装说明](https://www.jianshu.com/p/b6f34ae55c90)，[MAC 安装说明](https://www.jianshu.com/p/ae872a26b658)（安装过程可能需要翻墙）
++ 安装 GO 开发环境，[Windows & Linux 安装说明](https://www.jianshu.com/p/b6f34ae55c90)，[MAC 安装说明](https://www.jianshu.com/p/ae872a26b658)（安装过程可能需要翻墙）。
+
++ 由于 GOMQ 使用 DEP 进行依赖管理，所以需要安装 DEP，用于下载项目中用到的第三方组件。[DEP 安装说明](https://studygolang.com/articles/10589) 。
 
 + 使用 GIT Checkout 源代码，代码路径：https://github.com/garychenc/gomq.git 。假设 Checkout 之后源代码的存放根目录（目录下有 README.md 文件的那个目录）的路径为 CODE_ROOT 。
+
++ 将 CODE_ROOT/mqd 路径添加到 GOPATH 环境变量中。
+
++ 在命令行控制台中进入 CODE_ROOT/mqd/src/client 目录，运行 dep ensure 命令。稍微等待之后，可看到 CODE_ROOT/mqd/src/client 目录多了一个 vendor 目录，即表示 dep ensure 命令运行成功，拉取到 client 所需的第三方组件（beego 日志组件）。
+
++ 在命令行控制台中进入 CODE_ROOT/mqd/src/common 目录，运行 dep ensure 命令。稍微等待之后，可看到 CODE_ROOT/mqd/src/common 目录多了一个 vendor 目录，即表示 dep ensure 命令运行成功。
+
++ 在命令行控制台中进入 CODE_ROOT/mqd/src/server 目录，运行 dep ensure 命令。稍微等待之后，可看到 CODE_ROOT/mqd/src/server 目录多了一个 vendor 目录，即表示 dep ensure 命令运行成功，拉取到 server 所需的第三方组件（beego 日志组件）。
+
++ 在命令行控制台中进入 CODE_ROOT/mqd 目录，运行 go build -o ./bin/gomqd server/main 命令，编译可执行文件到 bin 目录，文件名为 gomqd 。
+
++ 将 CODE_ROOT/mqd/src/server/main 中的 config，logs，store 目录拷贝到 CODE_ROOT/mqd/bin 目录。
+
++ 打开 CODE_ROOT/mqd/bin/config/server.yml 配置文件，将 ListeningAddress 配置项的服务器监听 IP 改为本机 IP，或者不改动亦可。从配置文件中可以看到服务器默认部署了三条测试队列，部署新队列的方法请参考配置文件的注释。
+
++ 在命令行控制台中进入 CODE_ROOT/mqd/bin 目录，运行 ./gomqd 命令，看到 “-- MQ SERVER STARTED !! --” 日志则 GOMQ 服务器启动正常。
+
++ 查看 CODE_ROOT/mqd/bin/logs 目录，可以看到服务器运行时日志存放在该目录。包含：mq.log 和 main.log 两个日志文件，mq.log 记录消息服务器运行时的各种日志，main.log 记录 main 函数的启动日志。
+
++ 查看 CODE_ROOT/mqd/bin/store 目录，可以看到所有队列的消息持久化文件存放在该目录。消费者的元数据文件也会存放在该目录，目前没有消费者，所以没有任何消费者元数据文件。
+
++ 暂时将 CODE_ROOT/mqd 路径从 GOPATH 环境变量中移除，然后将 CODE_ROOT/client-example 路径添加到 GOPATH 环境变量中。
+
++ 在命令行控制台中进入 CODE_ROOT/client-example/src/example 目录，运行 dep ensure 命令。

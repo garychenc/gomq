@@ -17,10 +17,6 @@
 package mq
 
 import (
-	"client/ccomm"
-	"common/config"
-	"common/protocol"
-	"common/utils"
 	"strconv"
 	"strings"
 	"sync"
@@ -29,8 +25,8 @@ import (
 type NetworkMqClient struct {
 	serverAddress string
 	sendRequestTimeout int64
-	logConfig *config.LogConfig
-	idGenerator *utils.SequenceGenerator
+	logConfig *LogConfig
+	idGenerator *SequenceGenerator
 }
 
 const (
@@ -63,7 +59,7 @@ func NewNetworkMqClient(mqServerAddress string, sendRequestTimeout int64) IMqCli
 		panic("mqServerAddress can not be empty")
 	}
 
-	idGen, err := utils.NewSequenceGenerator()
+	idGen, err := NewSequenceGenerator()
 	if err != nil {
 		panic("Create id generator failed")
 	}
@@ -84,12 +80,12 @@ func NewNetworkMqClient(mqServerAddress string, sendRequestTimeout int64) IMqCli
  * An new MQ client instance.
  *
  */
-func NewNetworkMqClientWithLogConfig(mqServerAddress string, sendRequestTimeout int64, logConfig *config.LogConfig) IMqClient {
+func NewNetworkMqClientWithLogConfig(mqServerAddress string, sendRequestTimeout int64, logConfig *LogConfig) IMqClient {
 	if mqServerAddress = strings.Trim(mqServerAddress, " "); len(mqServerAddress) == 0 {
 		panic("mqServerAddress can not be empty")
 	}
 
-	idGen, err := utils.NewSequenceGenerator()
+	idGen, err := NewSequenceGenerator()
 	if err != nil {
 		panic("Create id generator failed")
 	}
@@ -108,7 +104,7 @@ func (mqClient *NetworkMqClient) CreateProducer(queueName string) (producer IPro
 		return nil, err
 	}
 
-	networkClient := ccomm.NewLongConnNetworkClient(networkClientConfig)
+	networkClient := NewLongConnNetworkClient(networkClientConfig)
 	err = networkClient.ConnectToServer("admin", "admin", strconv.FormatInt(producerClientId, 10))
 	if err != nil {
 		if networkClient != nil {
@@ -118,8 +114,8 @@ func (mqClient *NetworkMqClient) CreateProducer(queueName string) (producer IPro
 		return nil, err
 	}
 
-	cmd := &protocol.CreateProducerCommand{QueueName: queueName}
-	cmdBytes, err := protocol.CommandToBytes(cmd)
+	cmd := &CreateProducerCommand{QueueName: queueName}
+	cmdBytes, err := CommandToBytes(cmd)
 	if err != nil {
 		if networkClient != nil {
 			networkClient.Disconnect()
@@ -137,7 +133,7 @@ func (mqClient *NetworkMqClient) CreateProducer(queueName string) (producer IPro
 		return nil, err
 	}
 
-	respCmd, err := protocol.BytesToCommand(rpcResponse)
+	respCmd, err := BytesToCommand(rpcResponse)
 	if err != nil {
 		if networkClient != nil {
 			networkClient.Disconnect()
@@ -146,9 +142,9 @@ func (mqClient *NetworkMqClient) CreateProducer(queueName string) (producer IPro
 		return nil, err
 	}
 
-	if _, ok := respCmd.(*protocol.SuccessfullyResponse); ok {
+	if _, ok := respCmd.(*SuccessfullyResponse); ok {
 		return &NetworkProducer{networkClient: networkClient, mqClient: mqClient, queueName: queueName}, nil
-	} else if failedResp, ok := respCmd.(*protocol.FailedResponse); ok {
+	} else if failedResp, ok := respCmd.(*FailedResponse); ok {
 		if networkClient != nil {
 			networkClient.Disconnect()
 		}
@@ -178,7 +174,7 @@ func (mqClient *NetworkMqClient) CreateConsumer(consumerName string, queueName s
 		return nil, err
 	}
 
-	networkClient := ccomm.NewLongConnNetworkClient(networkClientConfig)
+	networkClient := NewLongConnNetworkClient(networkClientConfig)
 	err = networkClient.ConnectToServer("admin", "admin", strconv.FormatInt(consumerClientId, 10))
 	if err != nil {
 		if networkClient != nil {
@@ -188,8 +184,8 @@ func (mqClient *NetworkMqClient) CreateConsumer(consumerName string, queueName s
 		return nil, err
 	}
 
-	cmd := &protocol.CreateConsumerCommand{QueueName: queueName, ConsumerName: consumerName}
-	cmdBytes, err := protocol.CommandToBytes(cmd)
+	cmd := &CreateConsumerCommand{QueueName: queueName, ConsumerName: consumerName}
+	cmdBytes, err := CommandToBytes(cmd)
 	if err != nil {
 		if networkClient != nil {
 			networkClient.Disconnect()
@@ -207,7 +203,7 @@ func (mqClient *NetworkMqClient) CreateConsumer(consumerName string, queueName s
 		return nil, err
 	}
 
-	respCmd, err := protocol.BytesToCommand(rpcResponse)
+	respCmd, err := BytesToCommand(rpcResponse)
 	if err != nil {
 		if networkClient != nil {
 			networkClient.Disconnect()
@@ -216,10 +212,10 @@ func (mqClient *NetworkMqClient) CreateConsumer(consumerName string, queueName s
 		return nil, err
 	}
 
-	if _, ok := respCmd.(*protocol.SuccessfullyResponse); ok {
+	if _, ok := respCmd.(*SuccessfullyResponse); ok {
 		return &NetworkConsumer{networkClient: networkClient, defaultRpcTimeoutInMillis: networkClientConfig.DefaultRpcTimeoutInMillis,
 			mqClient: mqClient, consumerName: consumerName, queueName: queueName}, nil
-	} else if failedResp, ok := respCmd.(*protocol.FailedResponse); ok {
+	} else if failedResp, ok := respCmd.(*FailedResponse); ok {
 		if networkClient != nil {
 			networkClient.Disconnect()
 		}
@@ -234,8 +230,8 @@ func (mqClient *NetworkMqClient) CreateConsumer(consumerName string, queueName s
 	}
 }
 
-func (mqClient *NetworkMqClient) createNetworkClientConfig() *ccomm.LongConnNetworkClientConfig {
-	networkClientConfig := ccomm.NewLongConnNetworkClientDefaultConfig()
+func (mqClient *NetworkMqClient) createNetworkClientConfig() *LongConnNetworkClientConfig {
+	networkClientConfig := NewLongConnNetworkClientDefaultConfig()
 	networkClientConfig.ServerAddress = mqClient.serverAddress
 	if mqClient.logConfig != nil {
 		networkClientConfig.LogConfig = mqClient.logConfig
@@ -249,14 +245,14 @@ func (mqClient *NetworkMqClient) createNetworkClientConfig() *ccomm.LongConnNetw
 }
 
 type NetworkProducer struct {
-	networkClient ccomm.INetworkClient
+	networkClient INetworkClient
 	lock          sync.RWMutex
 
 	mqClient      *NetworkMqClient
 	queueName     string
 }
 
-func (producer *NetworkProducer) Produce(message protocol.IMessage) (msgId int64, err error) {
+func (producer *NetworkProducer) Produce(message IMessage) (msgId int64, err error) {
 	if message == nil {
 		return -1, MessageIsNilError
 	}
@@ -274,8 +270,8 @@ func (producer *NetworkProducer) Produce(message protocol.IMessage) (msgId int64
 
 		producer.lock.RUnlock()
 
-		cmd := &protocol.ProduceMessageCommand{Message: message}
-		cmdBytes, err := protocol.CommandToBytes(cmd)
+		cmd := &ProduceMessageCommand{Message: message}
+		cmdBytes, err := CommandToBytes(cmd)
 		if err != nil {
 			return -1, err
 		}
@@ -285,14 +281,14 @@ func (producer *NetworkProducer) Produce(message protocol.IMessage) (msgId int64
 			return -1, err
 		}
 
-		respCmd, err := protocol.BytesToCommand(rpcResponse)
+		respCmd, err := BytesToCommand(rpcResponse)
 		if err != nil {
 			return -1, err
 		}
 
-		if produceMessageResponse, ok := respCmd.(*protocol.ProduceMessageResponse); ok {
+		if produceMessageResponse, ok := respCmd.(*ProduceMessageResponse); ok {
 			return produceMessageResponse.MsgId, nil
-		} else if failedResp, ok := respCmd.(*protocol.FailedResponse); ok {
+		} else if failedResp, ok := respCmd.(*FailedResponse); ok {
 			if strings.Contains(failedResp.Err.Error(), "please create producer first.") {
 				producer.Close()
 
@@ -330,8 +326,8 @@ func (producer *NetworkProducer) Close() error {
 		return nil
 	}
 
-	cmd := &protocol.CloseProducerCommand{}
-	cmdBytes, _ := protocol.CommandToBytes(cmd)
+	cmd := &CloseProducerCommand{}
+	cmdBytes, _ := CommandToBytes(cmd)
 	networkClient.RPC(CloseProducerActionName, cmdBytes, -1)
 
 	networkClient.Disconnect()
@@ -340,7 +336,7 @@ func (producer *NetworkProducer) Close() error {
 }
 
 type NetworkConsumer struct {
-	networkClient             ccomm.INetworkClient
+	networkClient             INetworkClient
 	defaultRpcTimeoutInMillis int64
 	lock                      sync.RWMutex
 
@@ -349,7 +345,7 @@ type NetworkConsumer struct {
 	queueName    string
 }
 
-func (consumer *NetworkConsumer) Consume() (msg protocol.IMessage, err error) {
+func (consumer *NetworkConsumer) Consume() (msg IMessage, err error) {
 	for {
 		consumer.lock.RLock()
 
@@ -365,8 +361,8 @@ func (consumer *NetworkConsumer) Consume() (msg protocol.IMessage, err error) {
 
 		consumer.lock.RUnlock()
 
-		cmd := &protocol.ConsumeMessageWithTimeoutCommand{Timeout: defaultRpcTimeoutInMillis}
-		cmdBytes, err := protocol.CommandToBytes(cmd)
+		cmd := &ConsumeMessageWithTimeoutCommand{Timeout: defaultRpcTimeoutInMillis}
+		cmdBytes, err := CommandToBytes(cmd)
 		if err != nil {
 			return nil, err
 		}
@@ -376,16 +372,16 @@ func (consumer *NetworkConsumer) Consume() (msg protocol.IMessage, err error) {
 			return nil, err
 		}
 
-		respCmd, err := protocol.BytesToCommand(rpcResponse)
+		respCmd, err := BytesToCommand(rpcResponse)
 		if err != nil {
 			return nil, err
 		}
 
-		if consumeMessageResponse, ok := respCmd.(*protocol.ConsumeMessageResponse); ok {
+		if consumeMessageResponse, ok := respCmd.(*ConsumeMessageResponse); ok {
 			return consumeMessageResponse.Message, nil
-		} else if _, ok := respCmd.(*protocol.ConsumeMessageIsNilResponse); ok {
+		} else if _, ok := respCmd.(*ConsumeMessageIsNilResponse); ok {
 			continue
-		} else if failedResp, ok := respCmd.(*protocol.FailedResponse); ok {
+		} else if failedResp, ok := respCmd.(*FailedResponse); ok {
 			if strings.Contains(failedResp.Err.Error(), "please create consumer first.") {
 				consumer.Close()
 
@@ -415,7 +411,7 @@ func (consumer *NetworkConsumer) Consume() (msg protocol.IMessage, err error) {
 	}
 }
 
-func (consumer *NetworkConsumer) ConsumeWithTimeout(timeout int64) (msg protocol.IMessage, err error) {
+func (consumer *NetworkConsumer) ConsumeWithTimeout(timeout int64) (msg IMessage, err error) {
 	if timeout <= 0 {
 		return consumer.Consume()
 	} else {
@@ -433,8 +429,8 @@ func (consumer *NetworkConsumer) ConsumeWithTimeout(timeout int64) (msg protocol
 
 			consumer.lock.RUnlock()
 
-			cmd := &protocol.ConsumeMessageWithTimeoutCommand{Timeout: timeout}
-			cmdBytes, err := protocol.CommandToBytes(cmd)
+			cmd := &ConsumeMessageWithTimeoutCommand{Timeout: timeout}
+			cmdBytes, err := CommandToBytes(cmd)
 			if err != nil {
 				return nil, err
 			}
@@ -444,16 +440,16 @@ func (consumer *NetworkConsumer) ConsumeWithTimeout(timeout int64) (msg protocol
 				return nil, err
 			}
 
-			respCmd, err := protocol.BytesToCommand(rpcResponse)
+			respCmd, err := BytesToCommand(rpcResponse)
 			if err != nil {
 				return nil, err
 			}
 
-			if consumeMessageResponse, ok := respCmd.(*protocol.ConsumeMessageResponse); ok {
+			if consumeMessageResponse, ok := respCmd.(*ConsumeMessageResponse); ok {
 				return consumeMessageResponse.Message, nil
-			} else if _, ok := respCmd.(*protocol.ConsumeMessageIsNilResponse); ok {
+			} else if _, ok := respCmd.(*ConsumeMessageIsNilResponse); ok {
 				return nil, nil
-			} else if failedResp, ok := respCmd.(*protocol.FailedResponse); ok {
+			} else if failedResp, ok := respCmd.(*FailedResponse); ok {
 				if strings.Contains(failedResp.Err.Error(), "please create consumer first.") {
 					consumer.Close()
 
@@ -484,7 +480,7 @@ func (consumer *NetworkConsumer) ConsumeWithTimeout(timeout int64) (msg protocol
 	}
 }
 
-func (consumer *NetworkConsumer) ConsumeNoWait() (msg protocol.IMessage, err error) {
+func (consumer *NetworkConsumer) ConsumeNoWait() (msg IMessage, err error) {
 	for {
 		consumer.lock.RLock()
 
@@ -499,8 +495,8 @@ func (consumer *NetworkConsumer) ConsumeNoWait() (msg protocol.IMessage, err err
 
 		consumer.lock.RUnlock()
 
-		cmd := &protocol.ConsumeMessageNoWaitCommand{}
-		cmdBytes, err := protocol.CommandToBytes(cmd)
+		cmd := &ConsumeMessageNoWaitCommand{}
+		cmdBytes, err := CommandToBytes(cmd)
 		if err != nil {
 			return nil, err
 		}
@@ -510,16 +506,16 @@ func (consumer *NetworkConsumer) ConsumeNoWait() (msg protocol.IMessage, err err
 			return nil, err
 		}
 
-		respCmd, err := protocol.BytesToCommand(rpcResponse)
+		respCmd, err := BytesToCommand(rpcResponse)
 		if err != nil {
 			return nil, err
 		}
 
-		if consumeMessageResponse, ok := respCmd.(*protocol.ConsumeMessageResponse); ok {
+		if consumeMessageResponse, ok := respCmd.(*ConsumeMessageResponse); ok {
 			return consumeMessageResponse.Message, nil
-		} else if _, ok := respCmd.(*protocol.ConsumeMessageIsNilResponse); ok {
+		} else if _, ok := respCmd.(*ConsumeMessageIsNilResponse); ok {
 			return nil, nil
-		} else if failedResp, ok := respCmd.(*protocol.FailedResponse); ok {
+		} else if failedResp, ok := respCmd.(*FailedResponse); ok {
 			if strings.Contains(failedResp.Err.Error(), "please create consumer first.") {
 				consumer.Close()
 
@@ -564,8 +560,8 @@ func (consumer *NetworkConsumer) Commit() error {
 
 		consumer.lock.RUnlock()
 
-		cmd := &protocol.CommitMessageCommand{}
-		cmdBytes, err := protocol.CommandToBytes(cmd)
+		cmd := &CommitMessageCommand{}
+		cmdBytes, err := CommandToBytes(cmd)
 		if err != nil {
 			return err
 		}
@@ -575,14 +571,14 @@ func (consumer *NetworkConsumer) Commit() error {
 			return err
 		}
 
-		respCmd, err := protocol.BytesToCommand(rpcResponse)
+		respCmd, err := BytesToCommand(rpcResponse)
 		if err != nil {
 			return err
 		}
 
-		if _, ok := respCmd.(*protocol.SuccessfullyResponse); ok {
+		if _, ok := respCmd.(*SuccessfullyResponse); ok {
 			return nil
-		} else if failedResp, ok := respCmd.(*protocol.FailedResponse); ok {
+		} else if failedResp, ok := respCmd.(*FailedResponse); ok {
 			if strings.Contains(failedResp.Err.Error(), "please create consumer first.") {
 				consumer.Close()
 
@@ -627,8 +623,8 @@ func (consumer *NetworkConsumer) Reset() error {
 
 		consumer.lock.RUnlock()
 
-		cmd := &protocol.ResetConsumerCommand{}
-		cmdBytes, err := protocol.CommandToBytes(cmd)
+		cmd := &ResetConsumerCommand{}
+		cmdBytes, err := CommandToBytes(cmd)
 		if err != nil {
 			return err
 		}
@@ -638,14 +634,14 @@ func (consumer *NetworkConsumer) Reset() error {
 			return err
 		}
 
-		respCmd, err := protocol.BytesToCommand(rpcResponse)
+		respCmd, err := BytesToCommand(rpcResponse)
 		if err != nil {
 			return err
 		}
 
-		if _, ok := respCmd.(*protocol.SuccessfullyResponse); ok {
+		if _, ok := respCmd.(*SuccessfullyResponse); ok {
 			return nil
-		} else if failedResp, ok := respCmd.(*protocol.FailedResponse); ok {
+		} else if failedResp, ok := respCmd.(*FailedResponse); ok {
 			if strings.Contains(failedResp.Err.Error(), "please create consumer first.") {
 				consumer.Close()
 
@@ -684,8 +680,8 @@ func (consumer *NetworkConsumer) Close() error {
 		return nil
 	}
 
-	cmd := &protocol.CloseConsumerCommand{}
-	cmdBytes, _ := protocol.CommandToBytes(cmd)
+	cmd := &CloseConsumerCommand{}
+	cmdBytes, _ := CommandToBytes(cmd)
 	networkClient.RPC(CloseConsumerActionName, cmdBytes, -1)
 
 	networkClient.Disconnect()
