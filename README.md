@@ -74,7 +74,7 @@
 
 + 可通过查看 CODE_ROOT/client-example/src 目录下的源代码，了解 GOMQ 客户端的使用方法和 GOMQ 客户端各接口的详细 API 说明。
 
-# 修改源码
+# 参与开发
 
 TODO
 
