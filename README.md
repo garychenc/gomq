@@ -60,6 +60,8 @@
 
 + 查看 CODE_ROOT/mqd/bin/store 目录，可以看到所有队列的消息持久化文件存放在该目录。消费者的元数据文件也会存放在该目录，目前没有消费者，所以没有任何消费者元数据文件。
 
++ 至此 GOMQ 服务器已成功编译并启动，可将 CODE_ROOT/mqd/bin 目录下的所有文件和子目录移到其它任何不包含中文路径的目录，也可正常启动。接下来将介绍客户端示例，通过这个示例可了解如何使用 GOMQ 的客户端与 GOMQ 服务器进行交互。
+
 + 暂时将 CODE_ROOT/mqd 路径从 GOPATH 环境变量中移除，然后将 CODE_ROOT/client-example 路径添加到 GOPATH 环境变量中。
 
 + 在命令行控制台中进入 CODE_ROOT/client-example/src/pe 目录，运行 dep ensure 命令。
