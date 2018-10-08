@@ -82,4 +82,4 @@ Gary CHEN : email : gary.chen.c@qq.com
 
 系统整体架构图如下 ：
 
-![WholeArchitecture](https://pan.baidu.com/s/1xj_YNCkHjmNSbzD4KGmabg "系统整体架构图")
+![WholeArchitecture](https://github.com/garychenc/gomq/blob/master/img/whole-architecture.png "系统整体架构图")
