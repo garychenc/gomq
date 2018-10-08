@@ -83,3 +83,19 @@ Gary CHEN : email : gary.chen.c@qq.com
 系统整体架构图如下 ：
 
 ![WholeArchitecture](https://github.com/garychenc/gomq/blob/master/doc/img/whole-architecture.png "系统整体架构图")
+
+系统从整体上分成服务器端和客户端，服务器端从下至上包含以下组件：
+
++ Server Side Long Connection Network Layer，该组件用于对客户端 TCP 长连接进行管理，接收所有进入服务器的网络请求，结合 Network Transfer Protocol Process 组件对请求进行解码，然后将请求分发到对应的处理器进行处理。该组件同时还用于维持客户端与服务器端之间的长连接心跳。
+
++ MQ Command & Message Protocol Process，在下层组件对网络传输包进行解码之后，就将解码之后的请求发送到该组件对应的处理器进行请求处理。在处理过程中，需要对请求中包含的命令类型、消息内容等进行解码，然后执行相应的命令，例如：将消息添加到队列的末尾或者从队列中取出消息并且发送到客户端。
+
++ Queue Container，服务器端创建的队列、生产者、消费者对象的容器，每个客户端创建的生产者或消费者都对应着一个服务器端的生产者或消费者，并且通过远程调用的形式调用到服务器端对象的相应方法。这些服务器端的对象由 Queue Container 管理其生命周期。从队列的部署，生产者、消费者的创建到队列、生产者、消费者的关闭。
+
++ Producer，服务器端对应的生产者对象，用于执行将消息发送到队列的逻辑。
+
++ Consumer，服务器端对应的消费者对象，用于执行从队列中取出消息，管理最后消费消息指针等逻辑。
+
++ Queue，基于文件实现的循环数组列表（Circle Array List）。把一个大文件看成整块的大内存，在此基础上基于文件操作 API 实现：空间分配管理、空间循环使用、空间写入、空间数据读取、列表元素持久化、反持久化等逻辑。
+
++ Message & Consumer MetaData Storage，该组件属于 Queue 组件和 Consumer 组件的一部分，封装对文件操作的逻辑。
