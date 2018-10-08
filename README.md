@@ -74,10 +74,12 @@
 
 + 可通过查看 CODE_ROOT/client-example/src 目录下的源代码，了解 GOMQ 客户端的使用方法和 GOMQ 客户端各接口的详细 API 说明。
 
-# 参与开发
+# 联系方式
 
-TODO
+Gary CHEN : email : gary.chen.c@qq.com
 
-# 架构简介
+# 系统架构简介
 
-TODO
+系统整体架构图如下 ：
+
+![WholeArchitecture](https://pan.baidu.com/s/1xj_YNCkHjmNSbzD4KGmabg "系统整体架构图")
