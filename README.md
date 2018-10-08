@@ -99,3 +99,13 @@ Gary CHEN : email : gary.chen.c@qq.com
 + Queue，基于文件实现的循环数组列表（Circle Array List）。把一个大文件看成整块的大内存，在此基础上基于文件操作 API 实现：空间分配管理、空间循环使用、空间写入、空间数据读取、列表元素持久化、反持久化等逻辑。
 
 + Message & Consumer MetaData Storage，该组件属于 Queue 组件和 Consumer 组件的一部分，封装对文件操作的逻辑。
+
++ MQ Server，服务器端所有对象的容器，管理着整个服务器的启动、停止，以及所需的各种资源的申请和销毁。
+
+客户端包含以下组件：
+
++ Client Side Long Connection Network Layer、Network Transfer Protocol Process、MQ Command & Message Protocol Process 这些组件与服务器端的 Server Side Long Connection Network Layer、Network Transfer Protocol Process、MQ Command & Message Protocol Process 组件一一对应，完成客户端的长连接管理、网络请求协议编解码、网络请求发送、网络请求处理等逻辑。
+
++ MQ Client，实现 MQ 客户端业务逻辑的封装。
+
++ MQ Client API，对外提供操作 MQ 服务器的 API 接口。
